@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const systemPrompt = `You are a specialized assistant designed to help users by providing summaries and detailed notes on YouTube videos based on their transcripts. Your role includes distilling the essential information from a video into a concise and informative summary. Additionally, you are equipped to answer specific questions related to the content of the video. Your responses should be informative, precise, and directly related to the content discussed in the video transcript. Use clear and concise language to enhance understanding and retention.
@@ -20,34 +20,69 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function POST(req: Request, res: Response, transcript: any) {
-  const fullPrompt = `${systemPrompt}\n\nTranscript: ${transcript}`;
-  // Set up the messages array
-  const messages = [
-    { role: "system", content: systemPrompt },
-    {
-      role: "user",
-      content: `Please summarize the following transcript:\n${transcript}`,
-    },
-  ];
+async function fetchTranscript(videoId: string) {
+  console.log(videoId);
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8080/transcript?video_id=${videoId}`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP status ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return {
+      error: "Failed to fetch",
+    };
+  }
+}
+
+export async function POST(req: NextRequest, res: NextResponse) {
+  const body = await req.json();
+
+  const videoId = body.link;
+  console.log("Extracted video ID:", videoId);
 
   try {
+    const transcriptData = await fetchTranscript(videoId);
+
+    const fullPrompt = `${systemPrompt}\n\nTranscript: ${transcriptData}`;
+
+    //return Response.json({'message': fullPrompt})
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `Please summarize the following transcript:\n${transcript}`,
+          content: `Please summarize the following transcript:\n${transcriptData}`,
         },
       ],
       stream: true,
+      max_tokens: 500,
+    });
+
+    let generatedText = "";
+    for await (const chunk of completion) {
+      generatedText += chunk.choices[0]?.delta?.content || "";
+    }
+
+    return NextResponse.json(generatedText, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   } catch (error) {
-    console.error("Error generating summary:", error);
-    return {
-      error:
-        "Failed to generate summary due to an internal server error. Please try again.",
-    };
+    console.error("Error processing request:", error);
+    return new NextResponse("Internal Server Error", {
+      status: 500,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 }

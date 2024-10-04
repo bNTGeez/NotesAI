@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { AppBar, Toolbar, Button } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // Corrected import for useRouter
 
 const Navbar = () => {
   const router = useRouter();

@@ -26,7 +26,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/api/chat/route.ts",
+    "app/api/createNotes/route.ts",
     "app/components/Navbar.tsx",
     "app/page.tsx",
     "app/layout.js"
