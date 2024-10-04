@@ -11,14 +11,13 @@ const Hero = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <Typography
-        sx={{
-          fontSize: 50,
-        }}
+        variant='h2'
       >
         Welcome to Notes Taker!
       </Typography>
       <Button
         sx={{
+          mt: 5, 
           backgroundColor: "black",
           color: "white",
         }}

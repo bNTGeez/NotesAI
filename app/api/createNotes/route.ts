@@ -21,38 +21,26 @@ const openai = new OpenAI({
 });
 
 async function fetchTranscript(videoId: string) {
-  console.log(videoId);
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8080/transcript?video_id=${videoId}`,
-      {
-        method: "GET",
-      }
-    );
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
+
+
+    const response = await fetch(`${baseUrl}/transcript?video_id=${videoId}`, {
+      method: "GET",
+    });
     if (!response.ok) {
       throw new Error(`HTTP status ${response.status}`);
     }
     const data = await response.json();
     return data;
-  } catch (error) {
-    return {
-      error: "Failed to fetch",
-    };
-  }
 }
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
   const body = await req.json();
 
   const videoId = body.link;
-  console.log("Extracted video ID:", videoId);
 
   try {
     const transcriptData = await fetchTranscript(videoId);
-
-    const fullPrompt = `${systemPrompt}\n\nTranscript: ${transcriptData}`;
-
-    //return Response.json({'message': fullPrompt})
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

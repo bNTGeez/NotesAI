@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 
-const createNotes = () => {
+const CreateNotes = () => {
   const [inputValue, setInputValue] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -51,24 +51,33 @@ const createNotes = () => {
         <Typography variant="h3" sx={{ mt: 10 }}>
           Generate Notes
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Insert Youtube Link"
-            id="outlined-size-normal"
-            onChange={handleInputChange}
-            sx={{
-              mt: 10,
-              width: "700px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "15px",
-              },
-            }}
-          ></TextField>
-          <Button type="submit" sx={{ mb: 2 }}>
-            Create
-          </Button>
-        </form>
+        <Typography sx={{ fontSize: 10 }}>
+          Youtube links are currently not supported, please use the VideoID
+        </Typography>
+        <Typography sx={{ fontSize: 10 }}>
+          Ex: https://www.youtube.com/watch?v=KsXp22QLMv0&ab_channel=BrianCache
+        </Typography>
+        <Typography sx={{ fontSize: 10 }}>VideoID: KsXp22QLMv0</Typography>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Insert Youtube VideoID"
+              id="outlined-size-normal"
+              onChange={handleInputChange}
+              sx={{
+                mt: 10,
+                width: "400px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "15px",
+                },
+              }}
+            ></TextField>
+            <Button type="submit" variant="contained" sx={{ mx: 2, mt: 11 }}>
+              Create
+            </Button>
+          </form>
+        </Box>
         <Box
           sx={{
             width: "100vw",
@@ -86,6 +95,7 @@ const createNotes = () => {
             borderRadius="16px"
             p={2}
             spacing={3}
+            sx={{ mt: 10, overflowY: "auto" }}
           >
             <Typography>
               <ReactMarkdown>{notes}</ReactMarkdown>
@@ -97,4 +107,4 @@ const createNotes = () => {
   );
 };
 
-export default createNotes;
+export default CreateNotes;
