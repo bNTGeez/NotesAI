@@ -47,7 +47,15 @@ const CreateNotes = () => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col justify-center items-center">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "primary.main",
+        }}
+      >
         <Typography variant="h3" sx={{ mt: 10 }}>
           Generate Notes
         </Typography>
@@ -69,11 +77,24 @@ const CreateNotes = () => {
                 mt: 10,
                 width: "400px",
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "15px",
+                  borderRadius: "15px", 
+                  "& fieldset": {
+                    borderColor: "black", 
+                  },
+                },
+                "& .MuiOutlinedInput-input": {
+                  backgroundColor: "white", 
+                  borderRadius: "inherit", 
+                  padding: "12px", 
                 },
               }}
-            ></TextField>
-            <Button type="submit" variant="contained" sx={{ mx: 2, mt: 11 }}>
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{ mx: 2, mt: 11, backgroundColor: "secondary.main" }}
+            >
               Create
             </Button>
           </form>
@@ -95,14 +116,14 @@ const CreateNotes = () => {
             borderRadius="16px"
             p={2}
             spacing={3}
-            sx={{ mt: 10, overflowY: "auto" }}
+            sx={{ mt: 10, overflowY: "auto", backgroundColor: 'white'}}
           >
             <Typography>
               <ReactMarkdown>{notes}</ReactMarkdown>
             </Typography>
           </Stack>
         </Box>
-      </div>
+      </Box>
     </>
   );
 };

@@ -11,9 +11,9 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#000" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#fff" }}>
       <Toolbar>
-        <Button sx={{ color: "#fff" }} onClick={handleHome}>
+        <Button sx={{ color: "#000" }} onClick={handleHome}>
           Home
         </Button>
       </Toolbar>
