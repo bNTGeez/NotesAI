@@ -8,14 +8,53 @@ A powerful AI-powered note-taking application that automatically generates detai
 
 ## Features
 
-🎥 **YouTube Integration**: Extract transcripts from any YouTube video
-📝 **Smart Note Generation**: AI-powered note creation with structured formatting
-🔍 **Topic Organization**: Automatically breaks down content into clear sections
-📚 **Detailed Breakdown**: Comprehensive coverage of main topics, subtopics, and key points
-🎯 **Key Takeaways**: Highlights the most important points from the video
-📱 **Modern UI**: Clean, responsive design with Material-UI and Tailwind CSS
-⚡ **Real-time Processing**: Instant note generation with streaming responses
-🔒 **Secure API**: Protected endpoints with proper error handling
+🎥 **YouTube Integration**
+
+- Extract transcripts from any YouTube video
+- Support for various YouTube URL formats
+- Real-time transcript processing
+
+📝 **Smart Note Generation**
+
+- AI-powered note creation
+- Structured formatting
+- Clear section organization
+
+🔍 **Topic Organization**
+
+- Automatic content breakdown
+- Clear section hierarchy
+- Logical flow between topics
+
+📚 **Detailed Breakdown**
+
+- Comprehensive topic coverage
+- Subtopic organization
+- Key point highlighting
+
+🎯 **Key Takeaways**
+
+- Important point extraction
+- Practical applications
+- Main concepts summary
+
+📱 **Modern UI**
+
+- Clean, responsive design
+- Material-UI components
+- Tailwind CSS styling
+
+⚡ **Real-time Processing**
+
+- Instant note generation
+- Streaming responses
+- Progress indication
+
+🔒 **Secure API**
+
+- Protected endpoints
+- Error handling
+- Rate limiting
 
 ## Tech Stack
 
