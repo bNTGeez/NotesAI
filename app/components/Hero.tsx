@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Container } from "@mui/material";
 import { useRouter } from "next/navigation";
 
 const Hero = () => {
@@ -8,29 +8,70 @@ const Hero = () => {
   const handleStart = () => {
     router.push("/createNotes");
   };
+
   return (
     <Box
       sx={{
-        backgroundColor: "primary.main",
+        minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
+        backgroundColor: "background.default",
+        pt: 8,
       }}
     >
-      <Typography variant="h2">Welcome to Notes Taker!</Typography>
-      <Button
-        sx={{
-          mb: 25,
-          mt: 5,
-          backgroundColor: "secondary.main",
-          color: "black",
-        }}
-        onClick={handleStart}
-      >
-        Get Started
-      </Button>
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 6,
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="h1"
+              sx={{
+                mb: 3,
+                color: "text.primary",
+                fontWeight: 600,
+              }}
+            >
+              Transform YouTube Videos into Notes
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 4,
+                color: "text.secondary",
+                fontWeight: 400,
+              }}
+            >
+              Effortlessly convert your favorite YouTube content into organized,
+              searchable notes. Save time and enhance your learning experience.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleStart}
+              sx={{
+                py: 1.5,
+                px: 3,
+                fontSize: "1rem",
+                borderRadius: 1,
+                textTransform: "none",
+                backgroundColor: "text.primary",
+                "&:hover": {
+                  backgroundColor: "text.primary",
+                  opacity: 0.9,
+                },
+              }}
+            >
+              Get Started
+            </Button>
+          </Box>
+        </Box>
+      </Container>
     </Box>
   );
 };

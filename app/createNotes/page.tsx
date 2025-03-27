@@ -1,128 +1,105 @@
 "use client";
-import { TextField, Typography, Button, Stack, Box } from "@mui/material";
+import {
+  TextField,
+  Typography,
+  Button,
+  Box,
+  Container,
+  CircularProgress,
+} from "@mui/material";
 import Navbar from "../components/Navbar";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 const CreateNotes = () => {
-  const [inputValue, setInputValue] = useState("");
+  const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const getTranscript = async () => {
-    console.log("Input Value", inputValue);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url) return;
+
+    setLoading(true);
+    setError("");
+
     try {
-      const response = await fetch("api/createNotes", {
+      const response = await fetch("/api/createNotes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ link: inputValue }),
+        body: JSON.stringify({ url }),
       });
 
-      console.log("HTTP Response Status:", response.status);
-
-      if (!response.ok) {
-        throw new Error(`HTTP status ${response.status}`);
-      }
-
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
       setNotes(data);
-    } catch (error) {
-      console.error("Failed to get transcript", error);
-      setNotes("Failed to get Notes" + error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to get notes");
+      setNotes("");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    console.log("Updated Value", event.target.value);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    getTranscript();
-    setInputValue("");
   };
 
   return (
     <>
       <Navbar />
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "primary.main",
-        }}
-      >
-        <Typography variant="h3" sx={{ mt: 10 }}>
-          Generate Notes
-        </Typography>
-        <Typography sx={{ fontSize: 10 }}>
-          Youtube links are currently not supported, please use the VideoID
-        </Typography>
-        <Typography sx={{ fontSize: 10 }}>
-          Ex: https://www.youtube.com/watch?v=KsXp22QLMv0&ab_channel=BrianCache
-        </Typography>
-        <Typography sx={{ fontSize: 10 }}>VideoID: KsXp22QLMv0</Typography>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <form onSubmit={handleSubmit}>
+      <Box sx={{ minHeight: "100vh", pt: 8, bgcolor: "background.default" }}>
+        <Container maxWidth="lg">
+          <Typography variant="h1" sx={{ mb: 2, fontWeight: 600 }}>
+            Generate Notes
+          </Typography>
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ mb: 6 }}>
             <TextField
               fullWidth
-              label="Insert Youtube VideoID"
-              id="outlined-size-normal"
-              onChange={handleInputChange}
-              sx={{
-                mt: 10,
-                width: "400px",
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "15px", 
-                  "& fieldset": {
-                    borderColor: "black", 
-                  },
-                },
-                "& .MuiOutlinedInput-input": {
-                  backgroundColor: "white", 
-                  borderRadius: "inherit", 
-                  padding: "12px", 
-                },
-              }}
+              label="YouTube URL"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={loading}
+              error={!!error}
+              helperText={error}
+              placeholder="https://www.youtube.com/watch?v=..."
+              sx={{ mb: 2 }}
             />
-
             <Button
               type="submit"
-              variant="contained"
-              sx={{ mx: 2, mt: 11, backgroundColor: "secondary.main" }}
+              variant="outlined"
+              disabled={loading || !url}
+              sx={{
+                minWidth: "140px",
+                position: "relative",
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
+              }}
             >
-              Create
+              {loading ? (
+                <CircularProgress size={20} sx={{ position: "absolute" }} />
+              ) : (
+                "Generate Notes"
+              )}
             </Button>
-          </form>
-        </Box>
-        <Box
-          sx={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Stack
-            direction={"column"}
-            width="600px"
-            height="800px"
-            border="2px solid grey"
-            borderRadius="16px"
-            p={2}
-            spacing={3}
-            sx={{ mt: 10, overflowY: "auto", backgroundColor: 'white'}}
-          >
-            <Typography>
+          </Box>
+
+          {notes && (
+            <Box
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 3,
+                bgcolor: "background.paper",
+                minHeight: "400px",
+                maxHeight: "600px",
+                overflowY: "auto",
+              }}
+            >
               <ReactMarkdown>{notes}</ReactMarkdown>
-            </Typography>
-          </Stack>
-        </Box>
+            </Box>
+          )}
+        </Container>
       </Box>
     </>
   );
