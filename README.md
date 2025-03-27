@@ -71,7 +71,6 @@ A powerful AI-powered note-taking application that automatically generates detai
 - Flask (Python)
 - YouTube Transcript API
 - CORS support
-- Gunicorn (Production)
 
 ## Getting Started
 
