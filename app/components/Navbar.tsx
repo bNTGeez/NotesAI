@@ -35,7 +35,7 @@ const Navbar = () => {
             }}
             onClick={() => router.push("/")}
           >
-            NotesTaker
+            NotesAI
           </Typography>
 
           <Box sx={{ display: "flex", gap: 2 }}>
