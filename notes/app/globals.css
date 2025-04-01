@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+.markdown-content {
+  line-height: 1.4;
+  font-size: 15px;
+  padding: 4px;
+  white-space: pre-wrap;
+}
+
+.markdown-content h1 {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-content h2 {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.4em;
+}
+
+.markdown-content h3 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 0.6em;
+  margin-bottom: 0.3em;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+  padding-left: 1.2em;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+  padding-left: 1.2em;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+.markdown-content li {
+  margin-bottom: 0.15em;
+}
+
+.markdown-content p {
+  margin-bottom: 0.6em;
+}
+
+.markdown-content strong,
+.markdown-content b {
+  font-weight: bold;
+}
+
+.markdown-content em,
+.markdown-content i {
+  font-style: italic;
+}
+
+.markdown-content code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.markdown-content pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.8em;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 0.6em;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid rgba(0, 0, 0, 0.2);
+  padding-left: 0.8em;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+}
+
+.markdown-content a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

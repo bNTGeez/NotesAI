@@ -1,9 +1,9 @@
-'use client'
+"use client";
+import React from "react";
 import "./globals.css";
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme'; 
-
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "./theme";
 
 export default function RootLayout({
   children,
@@ -11,14 +11,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           {children}
         </ThemeProvider>
-
       </body>
     </html>
   );
