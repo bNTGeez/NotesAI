@@ -11,11 +11,8 @@ import httpx
 load_dotenv()
 
 app = Flask(__name__)
-# Configure CORS with specific origins
-CORS(app, resources={r"/*": {"origins": [
-    "http://localhost:3000",
-    "https://notes-ai-three.vercel.app/"  
-]}})
+# Configure CORS properly
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://notes-ai-three.vercel.app"], "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization"]}})
 
 # Initialize OpenAI client without proxy settings
 client = OpenAI(
@@ -90,6 +87,11 @@ def getTranscript():
         else:
             return jsonify({"error": f"Error: {error_message}"}), 500
 
+@app.route("/cors-test", methods=['GET', 'OPTIONS'])
+def test_cors():
+    """Test for CORS to see if it is working correctly."""
+    return jsonify({"message": "CORS is working!"})
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", debug=False, port=port)
+    app.run(host="0.0.0.0", port=port, debug=False)
