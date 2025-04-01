@@ -18,8 +18,8 @@ export default function CreateNotes() {
   const [error, setError] = useState("");
   const [streaming, setStreaming] = useState(false);
 
-  // Get the API URL from environment variable
-  const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+  // avoid CORS issues
+  const apiUrl = "/api";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +44,19 @@ export default function CreateNotes() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
+        let errorMessage =
+          errorData.error || `HTTP error! status: ${response.status}`;
+
+        // Enhanced error messages
+        if (response.status === 429) {
+          errorMessage =
+            "YouTube rate limit reached. Please try again in a few minutes.";
+        } else if (errorMessage.includes("no transcript")) {
+          errorMessage =
+            "This video doesn't have captions/transcript available. Please try another video.";
+        }
+
+        throw new Error(errorMessage);
       }
 
       // Check if the response is a stream
