@@ -77,10 +77,24 @@ def getTranscript():
             return jsonify({"error": "Invalid YouTube URL"}), 400
             
         try:
-            # Get transcript directly like in the test route
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
+            # First try to get available transcripts
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            
+            # Try to get manual English transcript first
+            try:
+                transcript = transcript_list.find_transcript(['en'])
+            except:
+                # If manual transcript fails, try auto-generated English
+                try:
+                    transcript = transcript_list.find_generated_transcript(['en'])
+                except:
+                    # If both fail, try any available transcript
+                    transcript = transcript_list.find_manually_created_transcript(['en'])
+            
+            # Get the actual transcript
+            transcript_data = transcript.fetch()
             # puts all transcript text into one string
-            transcript_text = ' '.join([entry['text'] for entry in transcript])
+            transcript_text = ' '.join([entry['text'] for entry in transcript_data])
             
             # Generate notes using OpenAI with the new client
             stream = client.chat.completions.create(
