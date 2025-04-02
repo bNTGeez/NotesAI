@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import httpx
 import logging
+import time
+from urllib.parse import urlparse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +23,8 @@ CORS(app, resources={r"/*": {
     "origins": [
         "http://localhost:3000",
         "https://notes-ai-three.vercel.app",
-        "https://notesai-nywa.onrender.com"
+        "https://notesai-nywa.onrender.com",
+        "https://*.up.railway.app",  # Railway domain
     ],
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
@@ -119,25 +122,32 @@ def getTranscript():
         except Exception as e:
             error_message = str(e)
             logger.error(f"Error getting transcript: {error_message}")
+            
+            # Enhanced error messages for different scenarios
             if "Subtitles are disabled" in error_message:
                 return jsonify({
-                    "error": "This video has subtitles disabled. Please try a different video or enable subtitles on YouTube.",
-                    "details": "To enable subtitles on YouTube:\n1. Click the CC button in the video player\n2. Select 'English' or your preferred language\n3. If no subtitles are available, you can request them from the video owner"
+                    "error": "Unable to access video subtitles",
+                    "details": "This could be due to regional restrictions or YouTube's security measures. Please try:\n1. Using a different video\n2. Checking if the video has captions enabled on YouTube\n3. Waiting a few minutes and trying again"
                 }), 400
             elif "No transcript" in error_message:
                 return jsonify({
-                    "error": "This video has no transcript available",
-                    "details": "Please try a different video or enable subtitles on YouTube"
+                    "error": "No transcript available",
+                    "details": "This video doesn't have any captions or transcripts available. Please try a different video."
                 }), 400
             elif "Video unavailable" in error_message:
                 return jsonify({
-                    "error": "This video is unavailable or private",
-                    "details": "Make sure the video is public and accessible"
+                    "error": "Video unavailable",
+                    "details": "This video might be private, restricted, or no longer available. Please try a different video."
                 }), 400
+            elif "Too many requests" in error_message.lower():
+                return jsonify({
+                    "error": "Rate limit exceeded",
+                    "details": "YouTube is temporarily limiting access. Please wait a few minutes and try again."
+                }), 429
             else:
                 return jsonify({
                     "error": "Failed to get transcript",
-                    "details": error_message
+                    "details": f"An error occurred while trying to get the transcript. Please try again later. Error: {error_message}"
                 }), 500
                 
     except Exception as e:
