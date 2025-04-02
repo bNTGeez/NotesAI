@@ -77,19 +77,26 @@ def getTranscript():
             return jsonify({"error": "Invalid YouTube URL"}), 400
             
         try:
-            # First try to get available transcripts
+            # Get list of all available transcripts
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
             
-            # Try to get manual English transcript first
+            # Log available transcripts for debugging
+            logger.info(f"Available transcripts for video {video_id}:")
+            for transcript in transcript_list.manually_created_transcripts:
+                logger.info(f"Manual: {transcript.language_code} - {transcript.language}")
+            for transcript in transcript_list.generated_transcripts:
+                logger.info(f"Auto-generated: {transcript.language_code} - {transcript.language}")
+            
             try:
-                transcript = transcript_list.find_transcript(['en'])
+                transcript = transcript_list.find_manually_created_transcript(['en'])
             except:
-                # If manual transcript fails, try auto-generated English
                 try:
                     transcript = transcript_list.find_generated_transcript(['en'])
                 except:
-                    # If both fail, try any available transcript
-                    transcript = transcript_list.find_manually_created_transcript(['en'])
+                    try:
+                        transcript = transcript_list.manually_created_transcripts[0]
+                    except:
+                        transcript = transcript_list.generated_transcripts[0]
             
             # Get the actual transcript
             transcript_data = transcript.fetch()
@@ -125,6 +132,7 @@ def getTranscript():
             
         except Exception as e:
             error_message = str(e)
+            logger.error(f"Error getting transcript: {error_message}")
             if "No transcript" in error_message:
                 return jsonify({"error": "This video has no transcript available"}), 400
             elif "Video unavailable" in error_message:
@@ -133,6 +141,7 @@ def getTranscript():
                 return jsonify({"error": f"Error: {error_message}"}), 500
                 
     except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"Error: {str(e)}"}), 500
 
 if __name__ == "__main__":
