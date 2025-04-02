@@ -22,7 +22,7 @@ export default function CreateNotes() {
   const apiUrl =
     process.env.NODE_ENV === "development"
       ? "http://localhost:8080"
-      : "https://notesai-nywa.onrender.com";
+      : "https://notesai-production.up.railway.app";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
