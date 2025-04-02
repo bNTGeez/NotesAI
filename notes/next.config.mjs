@@ -7,14 +7,6 @@ const nextConfig = {
     ];
     return config;
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "https://notesai-nywa.onrender.com/:path*",
-      },
-    ];
-  },
 };
 
 export default nextConfig;

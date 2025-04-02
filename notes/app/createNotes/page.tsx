@@ -19,7 +19,10 @@ export default function CreateNotes() {
   const [streaming, setStreaming] = useState(false);
 
   // avoid CORS issues
-  const apiUrl = "/api";
+  const apiUrl =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8080"
+      : "https://notesai-nywa.onrender.com";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
