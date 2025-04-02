@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
-import youtube_dl
+from youtube_transcript_api import YouTubeTranscriptApi
 import re
 import os
 import json
@@ -54,23 +54,14 @@ def test():
     """Simple test route to check YouTube transcript API"""
     try:
         # Try a video with auto-generated captions
-        test_url = "https://www.youtube.com/watch?v=jNQXAC9IVRw"  
-        logger.info(f"Testing transcript retrieval for URL: {test_url}")
+        test_video_id = "jNQXAC9IVRw"  # "Me at the zoo" - first YouTube video ever
+        logger.info(f"Testing transcript retrieval for video ID: {test_video_id}")
         
-        ydl_opts = {
-            'writesubtitles': True,
-            'writeautomaticsub': True,
-            'subtitleslangs': ['en'],
-            'skip_download': True,
-            'quiet': True
-        }
+        # Get the transcript directly
+        transcript = YouTubeTranscriptApi.get_transcript(test_video_id)
+        logger.info(f"Successfully retrieved transcript with {len(transcript)} entries")
         
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(test_url, download=False)
-            if 'subtitles' in info or 'automatic_captions' in info:
-                return jsonify({"status": "success", "message": "YouTube transcript API is working!"})
-            else:
-                return jsonify({"status": "error", "message": "No subtitles found"}), 500
+        return jsonify({"status": "success", "message": "YouTube transcript API is working!"})
                 
     except Exception as e:
         logger.error(f"Test failed: {str(e)}")
@@ -91,43 +82,12 @@ def getTranscript():
             return jsonify({"error": "Invalid YouTube URL"}), 400
             
         try:
-            # Configure youtube-dl options
-            ydl_opts = {
-                'writesubtitles': True,
-                'writeautomaticsub': True,
-                'subtitleslangs': ['en'],
-                'skip_download': True,
-                'quiet': True
-            }
+            # Get the transcript directly
+            transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
+            logger.info(f"Successfully retrieved transcript with {len(transcript_data)} entries")
             
-            # Extract video info and subtitles
-            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
-                
-                # Check for available subtitles
-                if 'subtitles' not in info and 'automatic_captions' not in info:
-                    return jsonify({
-                        "error": "No subtitles available",
-                        "details": "This video doesn't have any subtitles or captions available. Please try a different video."
-                    }), 400
-                
-                # Get the transcript text
-                transcript_text = ""
-                if 'subtitles' in info and 'en' in info['subtitles']:
-                    # Try manual subtitles first
-                    transcript_url = info['subtitles']['en'][0]['url']
-                    response = httpx.get(transcript_url)
-                    transcript_text = response.text
-                elif 'automatic_captions' in info and 'en' in info['automatic_captions']:
-                    # Fall back to auto-generated captions
-                    transcript_url = info['automatic_captions']['en'][0]['url']
-                    response = httpx.get(transcript_url)
-                    transcript_text = response.text
-                else:
-                    return jsonify({
-                        "error": "No English subtitles available",
-                        "details": "This video doesn't have English subtitles or captions. Please try a different video."
-                    }), 400
+            # puts all transcript text into one string
+            transcript_text = ' '.join([entry['text'] for entry in transcript_data])
             
             # Generate notes using OpenAI
             stream = client.chat.completions.create(
@@ -159,10 +119,26 @@ def getTranscript():
         except Exception as e:
             error_message = str(e)
             logger.error(f"Error getting transcript: {error_message}")
-            return jsonify({
-                "error": "Failed to get transcript",
-                "details": error_message
-            }), 500
+            if "Subtitles are disabled" in error_message:
+                return jsonify({
+                    "error": "This video has subtitles disabled. Please try a different video or enable subtitles on YouTube.",
+                    "details": "To enable subtitles on YouTube:\n1. Click the CC button in the video player\n2. Select 'English' or your preferred language\n3. If no subtitles are available, you can request them from the video owner"
+                }), 400
+            elif "No transcript" in error_message:
+                return jsonify({
+                    "error": "This video has no transcript available",
+                    "details": "Please try a different video or enable subtitles on YouTube"
+                }), 400
+            elif "Video unavailable" in error_message:
+                return jsonify({
+                    "error": "This video is unavailable or private",
+                    "details": "Make sure the video is public and accessible"
+                }), 400
+            else:
+                return jsonify({
+                    "error": "Failed to get transcript",
+                    "details": error_message
+                }), 500
                 
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
