@@ -23,8 +23,7 @@ CORS(app, resources={r"/*": {
     "origins": [
         "http://localhost:3000",
         "https://notes-ai-three.vercel.app",
-        "https://notesai-nywa.onrender.com",
-        "https://*.up.railway.app",  # Railway domain
+        "notesai-production.up.railway.app"  
     ],
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
