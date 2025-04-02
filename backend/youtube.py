@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
-from youtube_transcript_api import YouTubeTranscriptApi
+import youtube_dl
 import re
 import os
 import json
@@ -54,10 +54,24 @@ def test():
     """Simple test route to check YouTube transcript API"""
     try:
         # Try a video with auto-generated captions
-        test_video_id = "jNQXAC9IVRw"  # "Me at the zoo" - first YouTube video ever
-        logger.info(f"Testing transcript retrieval for video ID: {test_video_id}")
-        transcript = YouTubeTranscriptApi.get_transcript(test_video_id)
-        return jsonify({"status": "success", "message": "YouTube transcript API is working!"})
+        test_url = "https://www.youtube.com/watch?v=jNQXAC9IVRw"  
+        logger.info(f"Testing transcript retrieval for URL: {test_url}")
+        
+        ydl_opts = {
+            'writesubtitles': True,
+            'writeautomaticsub': True,
+            'subtitleslangs': ['en'],
+            'skip_download': True,
+            'quiet': True
+        }
+        
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(test_url, download=False)
+            if 'subtitles' in info or 'automatic_captions' in info:
+                return jsonify({"status": "success", "message": "YouTube transcript API is working!"})
+            else:
+                return jsonify({"status": "error", "message": "No subtitles found"}), 500
+                
     except Exception as e:
         logger.error(f"Test failed: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -77,33 +91,45 @@ def getTranscript():
             return jsonify({"error": "Invalid YouTube URL"}), 400
             
         try:
-            # Get list of all available transcripts
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            # Configure youtube-dl options
+            ydl_opts = {
+                'writesubtitles': True,
+                'writeautomaticsub': True,
+                'subtitleslangs': ['en'],
+                'skip_download': True,
+                'quiet': True
+            }
             
-            # Log available transcripts for debugging
-            logger.info(f"Available transcripts for video {video_id}:")
-            for transcript in transcript_list.manually_created_transcripts:
-                logger.info(f"Manual: {transcript.language_code} - {transcript.language}")
-            for transcript in transcript_list.generated_transcripts:
-                logger.info(f"Auto-generated: {transcript.language_code} - {transcript.language}")
+            # Extract video info and subtitles
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                
+                # Check for available subtitles
+                if 'subtitles' not in info and 'automatic_captions' not in info:
+                    return jsonify({
+                        "error": "No subtitles available",
+                        "details": "This video doesn't have any subtitles or captions available. Please try a different video."
+                    }), 400
+                
+                # Get the transcript text
+                transcript_text = ""
+                if 'subtitles' in info and 'en' in info['subtitles']:
+                    # Try manual subtitles first
+                    transcript_url = info['subtitles']['en'][0]['url']
+                    response = httpx.get(transcript_url)
+                    transcript_text = response.text
+                elif 'automatic_captions' in info and 'en' in info['automatic_captions']:
+                    # Fall back to auto-generated captions
+                    transcript_url = info['automatic_captions']['en'][0]['url']
+                    response = httpx.get(transcript_url)
+                    transcript_text = response.text
+                else:
+                    return jsonify({
+                        "error": "No English subtitles available",
+                        "details": "This video doesn't have English subtitles or captions. Please try a different video."
+                    }), 400
             
-            try:
-                transcript = transcript_list.find_manually_created_transcript(['en'])
-            except:
-                try:
-                    transcript = transcript_list.find_generated_transcript(['en'])
-                except:
-                    try:
-                        transcript = transcript_list.manually_created_transcripts[0]
-                    except:
-                        transcript = transcript_list.generated_transcripts[0]
-            
-            # Get the actual transcript
-            transcript_data = transcript.fetch()
-            # puts all transcript text into one string
-            transcript_text = ' '.join([entry['text'] for entry in transcript_data])
-            
-            # Generate notes using OpenAI with the new client
+            # Generate notes using OpenAI
             stream = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -133,16 +159,17 @@ def getTranscript():
         except Exception as e:
             error_message = str(e)
             logger.error(f"Error getting transcript: {error_message}")
-            if "No transcript" in error_message:
-                return jsonify({"error": "This video has no transcript available"}), 400
-            elif "Video unavailable" in error_message:
-                return jsonify({"error": "This video is unavailable or private"}), 400
-            else:
-                return jsonify({"error": f"Error: {error_message}"}), 500
+            return jsonify({
+                "error": "Failed to get transcript",
+                "details": error_message
+            }), 500
                 
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
-        return jsonify({"error": f"Error: {str(e)}"}), 500
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
