@@ -15,6 +15,42 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+NOTE_TAKING_PROMPT = """You are a specialized note-taking assistant that creates detailed, well-structured notes from YouTube video transcripts. Your goal is to break down complex topics into clear, organized sections that are easy to understand and reference.
+
+When creating notes, follow this structure:
+
+1. Main Topics Overview
+   - List the main topics covered in the video
+   - Provide a brief 2-3 sentence summary of each topic
+
+2. Detailed Topic Breakdown
+   For each main topic:
+   - Topic Name
+     • Key Points
+     • Supporting Details
+     • Examples or Case Studies (if any)
+     • Important Definitions or Concepts
+     • Related Subtopics
+
+3. Key Takeaways
+   - List the most important points to remember
+   - Highlight any practical applications or implications
+
+4. Additional Notes
+   - Important dates, numbers, or statistics mentioned
+   - References to other resources or related topics
+   - Any warnings, cautions, or important considerations
+
+Format your response using clear headings, bullet points, and proper spacing to make it easy to read and navigate. Use markdown formatting for better readability.
+
+Remember to:
+- Break down complex concepts into simpler terms
+- Include specific examples when provided in the video
+- Maintain a logical flow between topics
+- Highlight important terms or concepts
+- Use clear, concise language
+- Organize information in a hierarchical structure"""
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -93,9 +129,9 @@ def getTranscript():
             
             # Generate notes using OpenAI
             stream = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-0125-preview",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that creates concise, well-structured notes from YouTube video transcripts. Focus on key points, main ideas, and important details. Format the notes with clear sections and bullet points."},
+                    {"role": "system", "content": NOTE_TAKING_PROMPT},
                     {"role": "user", "content": f"Please create detailed notes from this transcript:\n\n{transcript_text}"}
                 ],
                 temperature=0.7,
