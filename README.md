@@ -29,7 +29,6 @@ A modern AI-powered note-taking application that automatically generates detaile
 
 - Clean, modern UI with Material-UI
 - Responsive design for all devices
-- Dark/light mode support
 - Markdown rendering for formatted notes
 - Error handling with user-friendly messages
 
